@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}Today's Assigned Visits - HeatShield Volunteer{% endblock %}
+
+{% block content %}
+<div style="max-width: 760px; margin: 0 auto;">
+
+  <!-- Civic Header Banner -->
+  <div class="card" style="border-left: 6px solid var(--accent); padding: 1.1rem 1.25rem; margin-bottom: 1.25rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.6rem;">
+      <div>
+        <h1 style="font-size: 1.5rem; margin-bottom: 0.2rem;">Today's Assigned Visits</h1>
+        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 0;">
+          Volunteer: <strong>{{ volunteer.name if volunteer.name else 'Field Volunteer' }}</strong> &bull; Base Ward: <strong>{{ volunteer.ward }}</strong>
+        </p>
+      </div>
+      <div>
+        <span class="chip {% if day_level == 'Red' %}chip-red{% elif day_level == 'Orange' %}chip-orange{% else %}chip-green{% endif %}" style="font-size: 0.85rem;">
+          {% if day_level == 'Red' %}&#9888; RED ALERT DAY{% elif day_level == 'Orange' %}&#9650; ORANGE ALERT DAY{% else %}&#10003; GREEN DAY{% endif %}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Priority Alert if Missed 12:00 Cutoff Triggered -->
+  {% if sim_cutoff %}
+    <div class="alert alert-danger" style="border-left: 6px solid var(--status-red); margin-bottom: 1.25rem;">
+      <strong>[12:00 PM CUTOFF ENFORCED]</strong> High-risk households without a confirmed check-in have been elevated to the top of your queue. Conduct immediate doorstep welfare checks.
+    </div>
+  {% endif %}
+
+  <!-- Assigned Household Cards List -->
+  {% if visits %}
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem; font-size: 0.88rem; color: var(--text-muted);">
+      <span>Assigned households: <strong>{{ visits|length }}</strong></span>
+      <span>Sorted by: Risk &bull; Distance &bull; Missed Check-in</span>
+    </div>
+
+    {% for item in visits %}
+      <div class="volunteer-visit-card {% if item.has_sos or item.is_missed or item.score >= 70 %}risk-red priority-card{% elif item.score >= 45 %}risk-amber{% else %}risk-green{% endif %}">
+        
+        <!-- Header with Name, Ward & Big Score -->
+        <div class="volunteer-card-header">
+          <div style="flex: 1; min-width: 200px;">
+            <div style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 0.2rem;">
+              <h2 style="font-size: 1.3rem; margin: 0; color: var(--text-main);">
+                {{ item.name }}
+              </h2>
+              {% if item.has_sos %}
+                <span class="chip chip-red" style="font-weight: 700;">! SOS ACTIVE !</span>
+              {% elif item.is_missed %}
+                <span class="chip chip-red">MISSED 12:00 CHECK-IN</span>
+              {% endif %}
+            </div>
+            <div style="font-size: 0.88rem; color: var(--text-muted);">
+              Ward: <strong>{{ item.ward }}</strong> &bull; Proximity: <strong>{{ item.distance_km }} km</strong> from base
+            </div>
+          </div>
+
+          <!-- Big Risk Score -->
+          <div style="text-align: right; flex-shrink: 0;">
+            <div class="score-display">
+              <span class="score-number" style="color: {% if item.has_sos or item.score >= 70 %}var(--status-red){% elif item.score >= 45 %}var(--status-amber){% else %}var(--status-green){% endif %};">
+                {{ item.score }}
+              </span>
+              <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">/100</span>
+            </div>
+            <span class="chip {% if item.has_sos or item.score >= 70 %}chip-red{% elif item.score >= 45 %}chip-orange{% else %}chip-green{% endif %}">
+              {{ item.category }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Address & Contact -->
+        <p style="font-size: 0.92rem; margin-bottom: 0.45rem;">
+          <strong>Address:</strong> {{ item.address }}
+          {% if item.phone %} &bull; <strong>Phone:</strong> <a href="tel:{{ item.phone }}">{{ item.phone }}</a>{% endif %}
+        </p>
+
+        <!-- One-Line Reasons Block -->
+        <div class="reasons-line">
+          <strong>Vulnerability:</strong> {{ item.reasons|join(' • ') }}
+        </div>
+
+        <!-- Previous Visit State (If recorded today) -->
+        {% if item.last_visit_status %}
+          <div style="font-size: 0.84rem; margin-bottom: 0.75rem; color: var(--text-muted);">
+            Previous visit today: <span class="chip chip-muted">{{ item.last_visit_status.replace('_', ' ').title() }}</span>
+            {% if item.last_supplies and item.last_supplies != 'none' %}
+              &bull; Supplies logged: <strong>{{ item.last_supplies.upper() }}</strong>
+            {% endif %}
+          </div>
+        {% endif %}
+
+        <!-- Volunteer Action Form -->
+        <form method="POST" action="{{ url_for('volunteer.record_visit') }}" style="border-top: 1px solid var(--border-light); padding-top: 0.85rem;">
+          <input type="hidden" name="household_id" value="{{ item.household_id }}">
+          <input type="hidden" name="assignment_id" value="{{ item.assignment_id }}">
+
+          <div class="form-row" style="margin-bottom: 0.75rem;">
+            <div class="form-col" style="min-width: 170px;">
+              <label style="font-size: 0.82rem; font-weight: 600; margin-bottom: 0.25rem; display:block;">Supplies Given:</label>
+              <select name="supplies_given" class="form-control" style="font-size: 0.88rem; padding: 0.45rem;">
+                <option value="none">None</option>
+                <option value="ors">ORS Packets</option>
+                <option value="water">Cold Drinking Water Bottles</option>
+                <option value="umbrella">Umbrella</option>
+                <option value="ors_water">ORS + Water Bottles</option>
+              </select>
+            </div>
+            <div class="form-col" style="min-width: 220px;">
+              <label style="font-size: 0.82rem; font-weight: 600; margin-bottom: 0.25rem; display:block;">Field Observation Note:</label>
+              <input type="text" name="notes" class="form-control" placeholder="e.g. Resting in shade, hydrated, given ORS" style="font-size: 0.88rem; padding: 0.45rem;">
+            </div>
+          </div>
+
+          <!-- Three Full-Width Action Buttons (At least 56px tall for outdoor visibility) -->
+          <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+            <button type="submit" name="status" value="checked" class="btn btn-success btn-volunteer-action">
+              &#10003; Checked (Safe & Hydrated)
+            </button>
+            <button type="submit" name="status" value="needs_help" class="btn btn-danger btn-volunteer-action">
+              ! Needs Immediate Assistance / Supplies
+            </button>
+            <button type="submit" name="status" value="not_reachable" class="btn btn-secondary btn-volunteer-action">
+              Door Locked / Not Reachable
+            </button>
+          </div>
+        </form>
+
+      </div>
+    {% endfor %}
+
+  {% else %}
+    <div class="card" style="text-align: center; padding: 3rem 1.5rem;">
+      <h3 style="color: var(--text-muted); margin-bottom: 0.5rem;">No Pending Visits Assigned Today</h3>
+      <p style="font-size: 0.95rem; color: var(--text-muted); max-width: 500px; margin: 0 auto 1.5rem auto;">
+        You have no assigned household visits for today. If the city escalates to an Orange or Red heat alert, the ward coordinator will auto-assign check-in lists.
+      </p>
+      <a href="{{ url_for('volunteer.activity') }}" class="btn btn-secondary">
+        View Visit History & Recognition Badges
+      </a>
+    </div>
+  {% endif %}
+
+  <!-- Base Location Setting Section -->
+  <div class="card" style="margin-top: 1.5rem;">
+    <div class="card-header">
+      <h4>Volunteer Base GPS Coordinates</h4>
+    </div>
+    <form method="POST" action="{{ url_for('volunteer.update_location') }}">
+      <div class="form-row">
+        <div class="form-col form-group">
+          <label for="latitude" style="font-size: 0.82rem;">Base Latitude</label>
+          <input type="text" id="latitude" name="latitude" class="form-control" value="{{ volunteer.base_latitude }}" required>
+        </div>
+        <div class="form-col form-group">
+          <label for="longitude" style="font-size: 0.82rem;">Base Longitude</label>
+          <input type="text" id="longitude" name="longitude" class="form-control" value="{{ volunteer.base_longitude }}" required>
+        </div>
+      </div>
+      <div style="display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;">
+        <button type="button" class="btn btn-secondary btn-use-location" style="font-size: 0.85rem;">
+          Use My Phone GPS
+        </button>
+        <span id="geo-status" style="font-size: 0.8rem; color: var(--text-muted);"></span>
+        <button type="submit" class="btn btn-primary" style="font-size: 0.85rem; margin-left: auto;">
+          Save Base Coordinates
+        </button>
+      </div>
+    </form>
+  </div>
+
+</div>
+{% endblock %}

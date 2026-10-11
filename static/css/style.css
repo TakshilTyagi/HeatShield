@@ -1,0 +1,842 @@
+/* ==========================================================================
+   HEATSHIELD DESIGN SYSTEM
+   Aesthetic: Civic public-notice & municipal health service bulletin.
+   Color Palette:
+     - Paper Background: #FAF7F2
+     - Primary Ink / Text: #1F1D1A
+     - Burnt Orange: #C2410C
+     - Forest Green: #2F7D4F
+     - Alert Amber: #D98A00
+     - Emergency Red: #B42318
+   Typography:
+     - Body: Inter, system-ui, -apple-system, sans-serif
+     - Headings: "Source Serif 4", Georgia, serif
+   Rules: Flat, 1px borders, 4-6px radius, minimal shadows, high visual density.
+   No gradients, glassmorphism, neon glows, or decorative motion.
+   ========================================================================== */
+
+:root {
+  /* Surface & Background */
+  --bg-paper: #FAF7F2;
+  --bg-card: #FFFFFF;
+  --bg-subtle: #F5EFEB;
+  --bg-muted: #EFE9E0;
+
+  /* Borders & Rules */
+  --border-light: #E7E1D7;
+  --border-color: #DDD6CA;
+  --border-dark: #B8B0A2;
+  --border-radius: 5px;
+  --radius-sm: 3px;
+  --radius-md: 5px;
+  --radius-lg: 6px;
+
+  /* Typography Colors */
+  --text-main: #1F1D1A;
+  --text-muted: #57524A;
+  --text-subtle: #7A7368;
+
+  /* Brand Accent */
+  --accent: #C2410C;
+  --accent-hover: #9A3412;
+  --accent-subtle: #FEF3EB;
+
+  /* Civic Status Semantics */
+  --status-green: #2F7D4F;
+  --status-green-bg: #EAF4EE;
+  --status-green-border: #A3D4B6;
+
+  --status-amber: #D98A00;
+  --status-amber-bg: #FEF7E6;
+  --status-amber-border: #F6CE84;
+
+  --status-orange: #C2410C;
+  --status-orange-bg: #FEF3EB;
+  --status-orange-border: #F5B899;
+
+  --status-red: #B42318;
+  --status-red-bg: #FDF0ED;
+  --status-red-border: #F5A9A2;
+
+  /* Font Stacks */
+  --font-serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-base-size: 15px;
+  --line-height-base: 1.5;
+
+  /* Spacing Scale */
+  --space-2xs: 0.25rem;
+  --space-xs: 0.5rem;
+  --space-sm: 0.75rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+}
+
+/* Elder-Friendly Large Text Mode */
+body.large-text-mode {
+  --font-base-size: 18px;
+  --line-height-base: 1.6;
+}
+
+/* Box Sizing & Reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* Base Body */
+body {
+  background-color: var(--bg-paper);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  font-size: var(--font-base-size);
+  line-height: var(--line-height-base);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Accessibility Focus States */
+*:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Typography Hierarchy */
+h1, h2, h3, h4, .brand-title {
+  font-family: var(--font-serif);
+  color: var(--text-main);
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+
+h1 {
+  font-size: 1.85rem;
+  margin-bottom: 0.75rem;
+}
+
+h2 {
+  font-size: 1.45rem;
+  margin-bottom: 0.6rem;
+}
+
+h3 {
+  font-size: 1.18rem;
+  margin-bottom: 0.45rem;
+}
+
+h4 {
+  font-size: 1.0rem;
+  margin-bottom: 0.35rem;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+p {
+  margin-bottom: 0.75rem;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+a:hover {
+  color: var(--accent-hover);
+}
+
+/* Layout Container */
+.container {
+  width: 100%;
+  max-width: 1140px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Site Header */
+header.site-header {
+  background: #FFFFFF;
+  border-bottom: 1px solid var(--border-color);
+  padding: 0.65rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.brand-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-decoration: none;
+  color: var(--text-main);
+}
+
+.brand-wrapper:hover {
+  text-decoration: none;
+}
+
+.brand-wrapper svg {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+.brand-title {
+  font-size: 1.25rem;
+  color: var(--text-main);
+}
+
+.site-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.15rem 0.4rem;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+}
+
+/* Navigation Links */
+nav[aria-label="Main Navigation"] {
+  display: flex;
+  align-items: center;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  list-style: none;
+}
+
+.nav-links a {
+  display: inline-block;
+  color: var(--text-main);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.35rem 0.65rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  transition: background-color 0.1s ease;
+}
+
+.nav-links a:hover {
+  background-color: var(--bg-subtle);
+  border-color: var(--border-light);
+  color: var(--text-main);
+  text-decoration: none;
+}
+
+/* Nav Controls */
+.nav-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.btn-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-color);
+  padding: 0.3rem 0.55rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: var(--text-main);
+  text-decoration: none;
+  line-height: 1.2;
+}
+
+.btn-toggle:hover {
+  background: var(--bg-muted);
+  text-decoration: none;
+}
+
+/* Flash Messages */
+.flash-container {
+  margin: 0.75rem auto 0 auto;
+  width: 100%;
+  max-width: 1140px;
+  padding: 0 1rem;
+}
+
+.alert {
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  margin-bottom: 0.6rem;
+  font-size: 0.92rem;
+  line-height: 1.45;
+}
+
+.alert-success {
+  background: var(--status-green-bg);
+  border-color: var(--status-green-border);
+  color: #174229;
+}
+
+.alert-danger {
+  background: var(--status-red-bg);
+  border-color: var(--status-red-border);
+  color: #7A1910;
+}
+
+.alert-warning {
+  background: var(--status-amber-bg);
+  border-color: var(--status-amber-border);
+  color: #6E4500;
+}
+
+.alert-info {
+  background: var(--bg-subtle);
+  border-color: var(--border-color);
+  color: var(--text-main);
+}
+
+/* Main Content Area */
+main.main-content {
+  flex: 1;
+  padding: 1.25rem 0 2rem 0;
+}
+
+/* Cards & Surfaces */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.card-header {
+  border-bottom: 1px solid var(--border-light);
+  padding-bottom: 0.6rem;
+  margin-bottom: 0.85rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.card-header h2,
+.card-header h3,
+.card-header h4 {
+  margin-bottom: 0;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-sans);
+  font-size: 0.92rem;
+  font-weight: 600;
+  padding: 0.55rem 1rem;
+  min-height: 44px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.btn:hover {
+  text-decoration: none;
+}
+
+.btn-primary {
+  background-color: var(--accent);
+  color: #FFFFFF;
+  border-color: var(--accent);
+}
+
+.btn-primary:hover {
+  background-color: var(--accent-hover);
+  border-color: var(--accent-hover);
+  color: #FFFFFF;
+}
+
+.btn-secondary {
+  background-color: #FFFFFF;
+  color: var(--text-main);
+  border-color: var(--border-color);
+}
+
+.btn-secondary:hover {
+  background-color: var(--bg-subtle);
+  border-color: var(--border-dark);
+  color: var(--text-main);
+}
+
+.btn-success {
+  background-color: var(--status-green);
+  color: #FFFFFF;
+  border-color: var(--status-green);
+}
+
+.btn-success:hover {
+  background-color: #24643E;
+  border-color: #24643E;
+  color: #FFFFFF;
+}
+
+.btn-danger {
+  background-color: var(--status-red);
+  color: #FFFFFF;
+  border-color: var(--status-red);
+}
+
+.btn-danger:hover {
+  background-color: #931B12;
+  border-color: #931B12;
+  color: #FFFFFF;
+}
+
+.btn-warning {
+  background-color: var(--status-amber);
+  color: #1F1D1A;
+  border-color: var(--status-amber);
+}
+
+.btn-warning:hover {
+  background-color: #B57400;
+  border-color: #B57400;
+  color: #1F1D1A;
+}
+
+.btn-sm {
+  font-size: 0.82rem;
+  padding: 0.35rem 0.65rem;
+  min-height: 32px;
+}
+
+.btn-lg {
+  font-size: 1.15rem;
+  padding: 0.85rem 1.5rem;
+  min-height: 56px;
+  width: 100%;
+}
+
+/* Resident Ultra Large "I'm okay" Button */
+.btn-resident-okay {
+  font-size: 1.35rem;
+  font-weight: 700;
+  min-height: 64px;
+  width: 100%;
+  border-radius: var(--radius-md);
+  letter-spacing: 0.01em;
+}
+
+/* Volunteer Full-Width Action Buttons (at least 56px tall) */
+.btn-volunteer-action {
+  font-size: 1.02rem;
+  font-weight: 600;
+  min-height: 56px;
+  width: 100%;
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+}
+
+/* Status Chips (Civic Notice Style: Border + BG + Contrast Text) */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  line-height: 1.2;
+}
+
+.chip-green {
+  background: var(--status-green-bg);
+  color: var(--status-green);
+  border-color: var(--status-green-border);
+}
+
+.chip-orange, .chip-amber {
+  background: var(--status-amber-bg);
+  color: #8C5800;
+  border-color: var(--status-amber-border);
+}
+
+.chip-red {
+  background: var(--status-red-bg);
+  color: var(--status-red);
+  border-color: var(--status-red-border);
+}
+
+.chip-muted {
+  background: var(--bg-subtle);
+  color: var(--text-muted);
+  border-color: var(--border-color);
+}
+
+/* Full-Width Civic Heat Banner */
+.heat-banner {
+  border: 1px solid var(--border-color);
+  border-left-width: 6px;
+  border-radius: var(--radius-md);
+  padding: 1.1rem 1.25rem;
+  margin-bottom: 1.25rem;
+  background: #FFFFFF;
+}
+
+.heat-banner-green {
+  border-left-color: var(--status-green);
+  background: #FFFFFF;
+}
+
+.heat-banner-orange {
+  border-left-color: var(--status-amber);
+  background: #FFFFFF;
+}
+
+.heat-banner-red {
+  border-left-color: var(--status-red);
+  background: #FFFFFF;
+}
+
+.heat-banner-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+}
+
+.heat-banner-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.heat-banner-icon {
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.heat-banner-advice {
+  font-size: 1.05rem;
+  line-height: 1.45;
+  color: var(--text-main);
+  margin-bottom: 0.3rem;
+  font-weight: 500;
+}
+
+.heat-banner-meta {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 0;
+}
+
+/* Tables (Dense Civic Data Table) */
+.table-wrapper {
+  overflow-x: auto;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: #FFFFFF;
+  margin-bottom: 1rem;
+}
+
+table.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  text-align: left;
+}
+
+table.data-table th,
+table.data-table td {
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid var(--border-light);
+  vertical-align: middle;
+}
+
+table.data-table th {
+  background-color: var(--bg-subtle);
+  font-weight: 600;
+  color: var(--text-main);
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid var(--border-color);
+}
+
+table.data-table tbody tr:hover {
+  background-color: #FAF7F2;
+}
+
+table.data-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Form Controls */
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.88rem;
+  margin-bottom: 0.3rem;
+  color: var(--text-main);
+}
+
+.form-control {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.92rem;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: #FFFFFF;
+  color: var(--text-main);
+  font-family: inherit;
+  line-height: 1.4;
+}
+
+.form-control:focus {
+  outline: 2px solid var(--accent);
+  border-color: var(--accent);
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.form-col {
+  flex: 1;
+  min-width: 220px;
+}
+
+/* Grids */
+.grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+}
+
+.grid-4 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 0.85rem;
+}
+
+/* KPI Metric Cards (Dense Civic Counter) */
+.metric-card {
+  background: #FFFFFF;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 1rem;
+  text-align: left;
+}
+
+.metric-card .metric-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-bottom: 0.25rem;
+}
+
+.metric-card .metric-val {
+  font-size: 1.85rem;
+  font-family: var(--font-serif);
+  font-weight: 700;
+  color: var(--text-main);
+  line-height: 1.1;
+  margin-bottom: 0.2rem;
+}
+
+.metric-card .metric-note {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* Map & Chart Side-by-Side on Desktop */
+.admin-visuals-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+@media (max-width: 900px) {
+  .admin-visuals-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.map-container {
+  height: 340px;
+  width: 100%;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-muted);
+}
+
+.chart-container {
+  position: relative;
+  height: 200px;
+  width: 100%;
+}
+
+/* Volunteer Mobile-First Priority Cards */
+.volunteer-visit-card {
+  background: #FFFFFF;
+  border: 1px solid var(--border-color);
+  border-left-width: 6px;
+  border-radius: var(--radius-md);
+  padding: 1.15rem;
+  margin-bottom: 1.15rem;
+}
+
+.volunteer-visit-card.risk-red {
+  border-left-color: var(--status-red);
+}
+
+.volunteer-visit-card.risk-orange,
+.volunteer-visit-card.risk-amber {
+  border-left-color: var(--status-amber);
+}
+
+.volunteer-visit-card.risk-green {
+  border-left-color: var(--status-green);
+}
+
+.volunteer-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.6rem;
+}
+
+.score-display {
+  display: flex;
+  align-items: baseline;
+  gap: 0.35rem;
+}
+
+.score-number {
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.reasons-line {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-sm);
+  padding: 0.45rem 0.65rem;
+  font-size: 0.85rem;
+  color: var(--text-main);
+  margin-bottom: 0.85rem;
+  line-height: 1.4;
+}
+
+/* Priority Card Highlights for SOS / Missed Cutoff */
+.priority-card {
+  border-left: 6px solid var(--status-red) !important;
+  background: #FFFDFB;
+}
+
+/* SOS Dedicated Box in Resident Dashboard */
+.resident-sos-box {
+  background: var(--status-red-bg);
+  border: 1px solid var(--status-red-border);
+  border-radius: var(--radius-md);
+  padding: 1.15rem;
+  text-align: center;
+}
+
+/* Footer (Civic Notice Format) */
+footer.site-footer {
+  background: #FFFFFF;
+  border-top: 1px solid var(--border-color);
+  padding: 1.25rem 1rem;
+  text-align: center;
+  font-size: 0.84rem;
+  color: var(--text-muted);
+  margin-top: auto;
+}
+
+.disclaimer-badge {
+  display: inline-block;
+  background: var(--status-red-bg);
+  border: 1px solid var(--status-red-border);
+  color: var(--status-red);
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  margin-top: 0.45rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  .header-inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .nav-links {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+  }
+  .nav-controls {
+    width: 100%;
+    justify-content: flex-start;
+    padding-top: 0.25rem;
+  }
+  .btn-volunteer-action {
+    min-height: 56px;
+    font-size: 1rem;
+  }
+}

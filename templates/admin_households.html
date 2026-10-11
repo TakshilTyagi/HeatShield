@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+
+{% block title %}Households & Assignments - HeatShield Admin{% endblock %}
+
+{% block content %}
+<div>
+  <div class="card-header" style="border:none; padding:0; margin-bottom: 1rem;">
+    <h2>Household Vulnerability Directory & Assignments</h2>
+    <p style="color: var(--text-muted); font-size: 0.95rem;">
+      Search, filter by risk or ward, and manage volunteer visit assignments for today.
+    </p>
+  </div>
+
+  <!-- Search & Filter Bar -->
+  <div class="card" style="padding: 0.85rem 1rem; margin-bottom: 1.25rem;">
+    <form method="GET" action="{{ url_for('admin.households') }}" class="form-row" style="align-items: flex-end;">
+      <div class="form-col" style="min-width: 200px;">
+        <label for="search" style="font-size: 0.85rem; font-weight: 600;">Search Name or Address:</label>
+        <input type="text" id="search" name="search" class="form-control" value="{{ search_query }}" placeholder="e.g. Ram Prasad, Quila">
+      </div>
+
+      <div class="form-col" style="min-width: 160px;">
+        <label for="ward" style="font-size: 0.85rem; font-weight: 600;">Filter by Ward:</label>
+        <select id="ward" name="ward" class="form-control">
+          <option value="">All Wards</option>
+          {% for w in wards %}
+            <option value="{{ w }}" {% if filter_ward == w %}selected{% endif %}>{{ w }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="form-col" style="min-width: 160px;">
+        <label for="risk" style="font-size: 0.85rem; font-weight: 600;">Filter by Risk:</label>
+        <select id="risk" name="risk" class="form-control">
+          <option value="">All Risk Levels</option>
+          <option value="Critical" {% if filter_risk == 'Critical' %}selected{% endif %}>Critical (&ge;70)</option>
+          <option value="Moderate" {% if filter_risk == 'Moderate' %}selected{% endif %}>Moderate (45-69)</option>
+          <option value="Low" {% if filter_risk == 'Low' %}selected{% endif %}>Low (&lt;45)</option>
+        </select>
+      </div>
+
+      <div style="display: flex; gap: 0.4rem;">
+        <button type="submit" class="btn btn-primary" style="font-size: 0.88rem; padding: 0.5rem 1rem;">Filter</button>
+        <a href="{{ url_for('admin.households') }}" class="btn btn-secondary" style="font-size: 0.88rem; padding: 0.5rem 0.8rem;">Reset</a>
+      </div>
+    </form>
+  </div>
+
+  <!-- Households Table -->
+  <div class="card">
+    <div class="card-header">
+      <h3>Registered Households ({{ households|length }})</h3>
+      <form method="POST" action="{{ url_for('admin.auto_assign') }}">
+        <button type="submit" class="btn btn-secondary" style="font-size: 0.85rem; padding: 0.35rem 0.75rem;">
+          Run Auto-Assign
+        </button>
+      </form>
+    </div>
+
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Resident Name</th>
+            <th>Ward & Address</th>
+            <th>Risk Score</th>
+            <th>Vulnerability Profile</th>
+            <th>Check-in Today</th>
+            <th>Assigned Volunteer</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for h in households %}
+            <tr>
+              <td>
+                <strong>{{ h.name }}</strong>
+                {% if h.has_sos %}<span class="chip chip-red" style="margin-left: 0.3rem;">SOS</span>{% endif %}
+                <div style="font-size: 0.8rem; color: var(--text-muted);">{{ h.phone or 'No phone' }}</div>
+              </td>
+              <td>
+                <strong>{{ h.ward }}</strong>
+                <div style="font-size: 0.82rem; color: var(--text-muted);">{{ h.address }}</div>
+              </td>
+              <td>
+                <span class="chip {% if h.score >= 70 %}chip-red{% elif h.score >= 45 %}chip-orange{% else %}chip-green{% endif %}">
+                  {{ h.score }} ({{ h.category }})
+                </span>
+              </td>
+              <td>
+                <div style="font-size: 0.82rem; line-height: 1.3;">
+                  Age {{ h.age }} &bull; {{ h.roof_type }} roof
+                  {% if h.is_living_alone %}&bull; <em>Alone</em>{% endif %}
+                  {% if h.is_outdoor_worker %}&bull; <em>Outdoor</em>{% endif %}
+                </div>
+              </td>
+              <td>
+                {% if h.has_checked_in %}
+                  <span class="chip chip-green">&#10003; Checked</span>
+                {% else %}
+                  <span class="chip chip-muted">Awaiting</span>
+                {% endif %}
+              </td>
+              <td>
+                <form method="POST" action="{{ url_for('admin.reassign_volunteer') }}" style="display: flex; gap: 0.3rem; align-items: center;">
+                  <input type="hidden" name="household_id" value="{{ h.id }}">
+                  <select name="volunteer_id" class="form-control" style="font-size: 0.82rem; padding: 0.25rem 0.4rem; width: auto;" onchange="this.form.submit()">
+                    <option value="unassign" {% if not h.assigned_vol_id %}selected{% endif %}>-- Unassigned --</option>
+                    {% for v in volunteers %}
+                      <option value="{{ v.id }}" {% if h.assigned_vol_id == v.id %}selected{% endif %}>
+                        {{ v.name }} ({{ v.ward }})
+                      </option>
+                    {% endfor %}
+                  </select>
+                </form>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

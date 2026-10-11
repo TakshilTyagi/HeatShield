@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}Emergency SOS Cases - HeatShield Admin{% endblock %}
+
+{% block content %}
+<div style="max-width: 900px; margin: 0 auto;">
+  <div class="card-header" style="border:none; padding:0; margin-bottom: 1.25rem;">
+    <h2>Heat Distress & SOS Incident Log</h2>
+    <p style="color: var(--text-muted); font-size: 0.95rem;">
+      Track resident emergency alarms, monitor desk response intervals, and document field interventions.
+    </p>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h3>All Distress Incidents ({{ cases|length }})</h3>
+    </div>
+
+    {% if cases %}
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Resident Name</th>
+              <th>Ward & Address</th>
+              <th>Phone</th>
+              <th>Triggered Time</th>
+              <th>Response Time</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in cases %}
+              <tr style="{% if not c.is_resolved %}background: #FFF8F8;{% endif %}">
+                <td>
+                  {% if c.is_resolved %}
+                    <span class="chip chip-green">Resolved</span>
+                  {% else %}
+                    <span class="chip chip-red">! ACTIVE !</span>
+                  {% endif %}
+                </td>
+                <td><strong>{{ c.name }}</strong></td>
+                <td>
+                  <strong>{{ c.ward }}</strong>
+                  <div style="font-size: 0.82rem; color: var(--text-muted);">{{ c.address }}</div>
+                </td>
+                <td><a href="tel:{{ c.phone }}">{{ c.phone }}</a></td>
+                <td>{{ c.created_at }}</td>
+                <td>
+                  {% if c.is_resolved %}
+                    <strong>{{ c.response_time_min }} min</strong>
+                  {% else %}
+                    <span style="color: var(--status-red); font-weight: 600;">Pending</span>
+                  {% endif %}
+                </td>
+                <td>
+                  {% if not c.is_resolved %}
+                    <form method="POST" action="{{ url_for('admin.resolve_sos') }}" style="display: flex; gap: 0.4rem; align-items: center;">
+                      <input type="hidden" name="sos_id" value="{{ c.id }}">
+                      <input type="text" name="notes" placeholder="Resolution note" class="form-control" style="font-size: 0.8rem; padding: 0.2rem 0.4rem; width: 140px;">
+                      <button type="submit" class="btn btn-sm btn-success" style="font-size: 0.8rem; padding: 0.2rem 0.5rem; min-height: 28px;">
+                        Resolve
+                      </button>
+                    </form>
+                  {% else %}
+                    <small style="color: var(--text-muted);">{{ c.resolution_notes or 'Closed' }}</small>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p style="color: var(--text-muted); font-size: 0.95rem;">No SOS incidents recorded. All households are currently safe.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

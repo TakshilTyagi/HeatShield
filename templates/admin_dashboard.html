@@ -1,0 +1,364 @@
+{% extends "base.html" %}
+
+{% block title %}Ward Operations Control - HeatShield Admin{% endblock %}
+
+{% block content %}
+<div>
+
+  <!-- DEMO CONTROL TOOLBAR (Section 11 Demo Flow) -->
+  <div class="card" style="background: var(--bg-subtle); border: 1px solid var(--border-color); padding: 0.75rem 1rem; margin-bottom: 1.25rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+      <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
+        <span style="font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--accent);">
+          Demo Control Desk:
+        </span>
+
+        <!-- Force Weather Switch -->
+        <form method="POST" action="{{ url_for('admin.set_demo_mode') }}" style="display: inline-flex; align-items: center; gap: 0.35rem;">
+          <label style="font-size: 0.84rem; font-weight: 600;">Heat Level:</label>
+          <select name="demo_mode" class="form-control" style="width: auto; padding: 0.25rem 0.5rem; font-size: 0.84rem;" onchange="this.form.submit()">
+            <option value="auto" {% if demo_mode == 'auto' %}selected{% endif %}>Auto (Live / Sensor)</option>
+            <option value="Green" {% if demo_mode == 'Green' %}selected{% endif %}>Green (Normal &lt;35°C)</option>
+            <option value="Orange" {% if demo_mode == 'Orange' %}selected{% endif %}>Orange (Alert 35-41°C)</option>
+            <option value="Red" {% if demo_mode == 'Red' %}selected{% endif %}>Red (Emergency &gt;41°C)</option>
+          </select>
+        </form>
+
+        <!-- Simulate 12:00 PM Cutoff Button -->
+        <form method="POST" action="{{ url_for('admin.toggle_cutoff') }}" style="display: inline;">
+          <button type="submit" class="btn {% if simulate_cutoff %}btn-danger{% else %}btn-secondary{% endif %}" style="font-size: 0.82rem; padding: 0.3rem 0.65rem; min-height: 32px;">
+            {% if simulate_cutoff %}&#9632; 12:00 Cutoff Active (Reset){% else %}&#9654; Simulate 12:00 Cutoff{% endif %}
+          </button>
+        </form>
+      </div>
+
+      <!-- Auto-Assign Field Volunteers Trigger Button -->
+      <div>
+        <form method="POST" action="{{ url_for('admin.auto_assign') }}" style="display: inline;">
+          <button type="submit" class="btn btn-primary" style="font-size: 0.84rem; padding: 0.35rem 0.85rem; min-height: 32px;">
+            &#9881; Auto-Assign Field Volunteers
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- STAT CARDS ROW -->
+  <div class="grid-4" style="margin-bottom: 1.25rem;">
+    <div class="metric-card">
+      <div class="metric-label">{{ t('metric_total_households') }}</div>
+      <div class="metric-val">{{ total_households }}</div>
+      <div class="metric-note">Registered in municipal wards</div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-label">{{ t('metric_checked_today') }}</div>
+      <div class="metric-val" style="color: var(--status-green);">{{ checked_today }}</div>
+      <div class="metric-note">Confirmed safe this morning</div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-label">{{ t('metric_unchecked_high_risk') }}</div>
+      <div class="metric-val" style="color: var(--status-amber);">{{ unchecked_high_risk }}</div>
+      <div class="metric-note">Score 60+ awaiting check-in</div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-label">{{ t('metric_open_sos') }}</div>
+      <div class="metric-val" style="color: var(--status-red);">{{ open_sos_count }}</div>
+      <div class="metric-note">
+        {% if open_sos_count > 0 %}
+          <strong style="color: var(--status-red);">Requires dispatch!</strong>
+        {% else %}
+          Zero active beacons
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTIVE EMERGENCY SOS LOG (IF ANY) -->
+  {% if open_sos_alerts %}
+    <div class="card" style="border-left: 6px solid var(--status-red); background: #FFFDFB; margin-bottom: 1.25rem;">
+      <div class="card-header" style="border-color: var(--status-red-border);">
+        <div style="display: flex; align-items: center; gap: 0.4rem;">
+          <span style="font-weight: 700; color: var(--status-red); font-size: 1.1rem;">[&#9888;]</span>
+          <h3 style="color: var(--status-red); margin: 0;">Urgent Heat SOS Emergencies</h3>
+        </div>
+        <span class="chip chip-red">{{ open_sos_alerts|length }} Active Beacons</span>
+      </div>
+      <div class="table-wrapper" style="margin-bottom: 0;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Resident Name</th>
+              <th>Ward</th>
+              <th>Address</th>
+              <th>Phone</th>
+              <th>Time Triggered</th>
+              <th>Operational Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in open_sos_alerts %}
+              <tr>
+                <td><strong>{{ s.name }}</strong></td>
+                <td>{{ s.ward }}</td>
+                <td>{{ s.address }}</td>
+                <td><a href="tel:{{ s.phone }}">{{ s.phone }}</a></td>
+                <td>{{ s.created_at }}</td>
+                <td>
+                  <form method="POST" action="{{ url_for('admin.resolve_sos') }}" style="display: inline;">
+                    <input type="hidden" name="sos_id" value="{{ s.id }}">
+                    <input type="hidden" name="notes" value="Dispatched medical team & resolved by ward desk">
+                    <button type="submit" class="btn btn-sm btn-success" style="font-size: 0.8rem; padding: 0.25rem 0.55rem; min-height: 28px;">
+                      &#10003; Resolve Case
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- MAP AND CHART SIDE BY SIDE ON DESKTOP (STACKED ON MOBILE) -->
+  <div class="admin-visuals-grid">
+    
+    <!-- Interactive Leaflet Heat Map -->
+    <div class="card" style="margin-bottom: 0;">
+      <div class="card-header">
+        <h3 style="font-size: 1.1rem;">Ward Heat Risk Map</h3>
+        <span class="chip {% if day_level == 'Red' %}chip-red{% elif day_level == 'Orange' %}chip-orange{% else %}chip-green{% endif %}">
+          {% if day_level == 'Red' %}&#9888; RED ALERT{% elif day_level == 'Orange' %}&#9650; ORANGE ALERT{% else %}&#10003; GREEN{% endif %}
+        </span>
+      </div>
+      <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0.45rem;">
+        Households by risk (Red &ge;70, Amber 45-69, Green &lt;45). Blue squares indicate cooling shelters.
+      </p>
+      <div id="admin-map" class="map-container"></div>
+    </div>
+
+    <!-- Chart.js Check-in Activity & 3-Day Heat Outlook -->
+    <div class="card" style="margin-bottom: 0; display: flex; flex-direction: column; justify-content: space-between;">
+      <div>
+        <div class="card-header">
+          <h3 style="font-size: 1.1rem;">Daily Check-in Activity</h3>
+          <span class="chip chip-muted">Past 7 Days</span>
+        </div>
+        <div class="chart-container">
+          <canvas id="checkinChart"></canvas>
+        </div>
+      </div>
+
+      <!-- 3-Day Heat Outlook -->
+      <div style="margin-top: 0.75rem; padding: 0.65rem 0.85rem; background: var(--bg-subtle); border: 1px solid var(--border-color); border-radius: var(--radius-sm);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+          <strong style="font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted);">
+            3-Day Predictive Heat Outlook:
+          </strong>
+          <span class="chip {% if outlook.trend == 'Hotter' %}chip-red{% else %}chip-muted{% endif %}">
+            Trend: {{ outlook.trend }}
+          </span>
+        </div>
+        <p style="font-size: 0.85rem; margin-bottom: 0.4rem; line-height: 1.4;">
+          {{ outlook.trend_explanation }}
+          {% if outlook.red_days_count > 0 %}
+            <strong style="color: var(--status-red);">{{ outlook.red_days_count }} RED alert days projected.</strong>
+          {% endif %}
+        </p>
+        <div style="display: flex; gap: 0.4rem;">
+          {% for d in outlook.days %}
+            <div style="flex: 1; text-align: center; font-size: 0.75rem; padding: 0.3rem 0.2rem; border: 1px solid var(--border-color); border-radius: var(--radius-sm); background: #FFFFFF;">
+              <div style="font-weight: 500;">{{ d.date[-5:] }}</div>
+              <strong style="font-size: 0.85rem;">{{ d.temp_max }}°C</strong>
+              <div style="font-size: 0.72rem; color: {% if d.level == 'Red' %}var(--status-red){% elif d.level == 'Orange' %}var(--status-amber){% else %}var(--status-green){% endif %}; font-weight: 600;">
+                {{ d.level }}
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- DENSE TABLE WITH STATUS CHIPS (WARD HOUSEHOLD TRIAGE) -->
+  <div class="card" style="margin-top: 1.25rem;">
+    <div class="card-header">
+      <div>
+        <h3 style="font-size: 1.15rem; margin-bottom: 0.15rem;">Ward Household Risk & Check-in Triage</h3>
+        <span style="font-size: 0.82rem; color: var(--text-muted);">
+          All monitored residences scoped to {{ city.name if city else 'your city' }}
+        </span>
+      </div>
+      <a href="{{ url_for('admin.households') }}" class="btn btn-sm btn-secondary">
+        Manage Full Register & Volunteer Assignments &rarr;
+      </a>
+    </div>
+
+    <div class="table-wrapper" style="margin-bottom: 0;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Resident Name</th>
+            <th>Ward</th>
+            <th>Risk Score</th>
+            <th>Category</th>
+            <th>Today's Welfare Status</th>
+            <th>Beacon</th>
+            <th>Vulnerability Factors</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in map_points %}
+            <tr>
+              <td><strong>{{ p.name }}</strong></td>
+              <td>{{ p.ward }}</td>
+              <td>
+                <span style="font-family: var(--font-serif); font-size: 1.05rem; font-weight: 700; color: {% if p.has_sos or p.score >= 70 %}var(--status-red){% elif p.score >= 45 %}var(--status-amber){% else %}var(--status-green){% endif %};">
+                  {{ p.score }}
+                </span>
+              </td>
+              <td>
+                <span class="chip {% if p.has_sos or p.score >= 70 %}chip-red{% elif p.score >= 45 %}chip-orange{% else %}chip-green{% endif %}">
+                  {{ p.category }}
+                </span>
+              </td>
+              <td>
+                {% if p.has_checked_in %}
+                  <span class="chip chip-green">&#10003; Checked Safe</span>
+                {% else %}
+                  <span class="chip chip-red">&#9888; Not Checked</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if p.has_sos %}
+                  <span class="chip chip-red">! SOS !</span>
+                {% else %}
+                  <span class="chip chip-muted">Clear</span>
+                {% endif %}
+              </td>
+              <td style="font-size: 0.82rem; color: var(--text-muted);">
+                {{ p.reasons|join(', ') }}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- OPERATIONAL QUICK CONTROLS -->
+  <div class="card">
+    <div class="card-header">
+      <h4>Municipal Ward Operations Navigation</h4>
+    </div>
+    <div style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
+      <a href="{{ url_for('admin.households') }}" class="btn btn-secondary" style="font-size: 0.85rem;">
+        Households & Assignments &rarr;
+      </a>
+      <a href="{{ url_for('admin.sos_cases') }}" class="btn btn-secondary" style="font-size: 0.85rem;">
+        SOS Emergency Log ({{ open_sos_count }}) &rarr;
+      </a>
+      <a href="{{ url_for('admin.cooling_centres') }}" class="btn btn-secondary" style="font-size: 0.85rem;">
+        Cooling Centres & Water Kiosks &rarr;
+      </a>
+      <a href="{{ url_for('admin.alerts') }}" class="btn btn-secondary" style="font-size: 0.85rem;">
+        Broadcast Heat Warning &rarr;
+      </a>
+      <a href="{{ url_for('admin.reports') }}" class="btn btn-secondary" style="font-size: 0.85rem;">
+        Operational Reports & CSV &rarr;
+      </a>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  // 1. Initialize Leaflet Map
+  const mapCenterLat = {{ (city.latitude if city and city.latitude else 28.3667) }};
+  const mapCenterLon = {{ (city.longitude if city and city.longitude else 79.4317) }};
+  const map = L.map("admin-map").setView([mapCenterLat, mapCenterLon], 13);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 18,
+    attribution: '&copy; OpenStreetMap'
+  }).addTo(map);
+
+  const points = {{ map_points|tojson }};
+  points.forEach(function (p) {
+    let color = "#2F7D4F"; // green
+    if (p.has_sos || p.score >= 70) color = "#B42318"; // red
+    else if (p.score >= 45) color = "#D98A00"; // amber
+
+    const circle = L.circleMarker([p.lat, p.lon], {
+      radius: p.has_sos ? 11 : 7,
+      fillColor: color,
+      color: "#FFFFFF",
+      weight: 1.5,
+      opacity: 1,
+      fillOpacity: 0.85
+    }).addTo(map);
+
+    circle.bindPopup(`
+      <strong>${p.name}</strong> (${p.ward})<br>
+      Risk Score: <strong>${p.score}</strong> (${p.category})<br>
+      Checked Today: ${p.has_checked_in ? 'Yes' : 'No'}<br>
+      SOS Active: ${p.has_sos ? '<span style="color:red;font-weight:bold;">YES</span>' : 'No'}<br>
+      <small>${p.reasons.join(', ')}</small>
+    `);
+  });
+
+  // Cooling points on admin map
+  const coolingPoints = {{ cooling_points|tojson }};
+  coolingPoints.forEach(function (cp) {
+    const square = L.rectangle([
+      [cp.latitude - 0.001, cp.longitude - 0.001],
+      [cp.latitude + 0.001, cp.longitude + 0.001]
+    ], {
+      color: "#1E40AF",
+      weight: 1,
+      fillColor: "#3B82F6",
+      fillOpacity: 0.8
+    }).addTo(map);
+
+    square.bindPopup(`<strong>[Cooling Station] ${cp.name}</strong><br>Type: ${cp.point_type}<br>Capacity: ${cp.capacity} (Occupancy: ${cp.occupancy})`);
+  });
+
+  // 2. Initialize Chart.js Bar Chart
+  const ctx = document.getElementById("checkinChart").getContext("2d");
+  new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: {{ chart_dates|tojson }},
+      datasets: [{
+        label: "Confirmed Check-ins",
+        data: {{ chart_counts|tojson }},
+        backgroundColor: "#2F7D4F",
+        borderColor: "#24643E",
+        borderWidth: 1,
+        borderRadius: 3
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { precision: 0 }
+        }
+      }
+    }
+  });
+});
+</script>
+{% endblock %}

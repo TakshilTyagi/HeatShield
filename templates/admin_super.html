@@ -1,0 +1,274 @@
+{% extends "base.html" %}
+
+{% block title %}Super Admin Pan-India Overview - HeatShield{% endblock %}
+
+{% block content %}
+<div>
+  <!-- Header Banner -->
+  <div class="card-header" style="border:none; padding:0; margin-bottom: 1.25rem;">
+    <h2>Pan-India Heatwave Control Center</h2>
+    <p style="color: var(--text-muted); font-size: 0.95rem;">
+      Real-time cross-municipal surveillance, climate-zone adaptive alerts, and nationwide emergency coordination.
+    </p>
+  </div>
+
+  <!-- Global Demo Toolbar -->
+  <div class="card" style="background: #F8F5EE; border: 1px solid #D5CFC5; padding: 0.85rem 1rem; margin-bottom: 1.25rem;">
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.8rem;">
+      <div style="display: flex; align-items: center; gap: 0.8rem; flex-wrap: wrap;">
+        <span style="font-weight: 700; font-size: 0.92rem; text-transform: uppercase; color: var(--accent);">
+          Global Multi-City Simulation:
+        </span>
+        <form method="POST" action="{{ url_for('admin.set_global_demo') }}" style="display: inline-flex; align-items: center; gap: 0.4rem;">
+          <label style="font-size: 0.88rem; font-weight: 600;">Global Weather Override:</label>
+          <select name="demo_mode" class="form-control" style="width: auto; padding: 0.25rem 0.5rem; font-size: 0.88rem;" onchange="this.form.submit()">
+            <option value="auto" {% if global_demo_mode == 'auto' %}selected{% endif %}>Auto (Live City Feeds)</option>
+            <option value="Green" {% if global_demo_mode == 'Green' %}selected{% endif %}>Force All Green</option>
+            <option value="Orange" {% if global_demo_mode == 'Orange' %}selected{% endif %}>Force All Orange</option>
+            <option value="Red" {% if global_demo_mode == 'Red' %}selected{% endif %}>Force All Red (Nationwide Heatwave)</option>
+          </select>
+        </form>
+      </div>
+
+      <div>
+        <a href="#add-city-section" class="btn btn-secondary" style="font-size: 0.85rem; padding: 0.35rem 0.75rem;">
+          + Add New City / Ward
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pan-India Heat Map -->
+  <div class="card" style="margin-bottom: 1.5rem;">
+    <div class="card-header">
+      <h3>All-India Heat Index Map</h3>
+      <span class="chip chip-muted">{{ cities|length }} Monitored Cities</span>
+    </div>
+    <div id="india-map" class="map-container" style="height: 440px;"></div>
+    <div style="font-size: 0.82rem; color: var(--text-muted); margin-top: 0.5rem;">
+      Markers indicate municipal centers colored by active threat level (Red &gt;41°C / severe, Orange 35-41°C / alert, Green &lt;35°C / normal).
+    </div>
+  </div>
+
+  <!-- All-Cities Operations Table -->
+  <div class="card" style="margin-bottom: 1.5rem;">
+    <div class="card-header">
+      <h3>Municipal Surveillance Grid</h3>
+    </div>
+    <div class="table-wrapper">
+      <table class="data-table" id="citiesTable">
+        <thead>
+          <tr>
+            <th onclick="sortTable(0)" style="cursor: pointer;">City & State &#8645;</th>
+            <th onclick="sortTable(1)" style="cursor: pointer;">Zone &#8645;</th>
+            <th onclick="sortTable(2)" style="cursor: pointer;">Today's Heat Level &#8645;</th>
+            <th onclick="sortTable(3)" style="cursor: pointer;">Heat Index &#8645;</th>
+            <th onclick="sortTable(4)" style="cursor: pointer;">Households &#8645;</th>
+            <th onclick="sortTable(5)" style="cursor: pointer;">Unchecked High-Risk &#8645;</th>
+            <th onclick="sortTable(6)" style="cursor: pointer;">Open SOS &#8645;</th>
+            <th onclick="sortTable(7)" style="cursor: pointer;">Volunteers &#8645;</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in cities %}
+            <tr>
+              <td>
+                <strong>{{ c.name }}</strong>
+                <div style="font-size: 0.8rem; color: var(--text-muted);">{{ c.state }}</div>
+              </td>
+              <td>
+                <span class="chip chip-muted" style="text-transform: capitalize;">{{ c.zone }}</span>
+              </td>
+              <td>
+                <span class="chip {% if c.level == 'Red' %}chip-red{% elif c.level == 'Orange' %}chip-orange{% else %}chip-green{% endif %}">
+                  {{ c.level.upper() }}
+                </span>
+              </td>
+              <td><strong>{{ c.heat_index }}°C</strong></td>
+              <td>{{ c.households }}</td>
+              <td>
+                {% if c.unchecked_high_risk > 0 %}
+                  <strong style="color: var(--status-orange);">{{ c.unchecked_high_risk }}</strong>
+                {% else %}
+                  0
+                {% endif %}
+              </td>
+              <td>
+                {% if c.open_sos > 0 %}
+                  <strong style="color: var(--status-red);">{{ c.open_sos }}</strong>
+                {% else %}
+                  0
+                {% endif %}
+              </td>
+              <td>{{ c.volunteers }}</td>
+              <td>
+                <a href="{{ url_for('admin.dashboard', city_id=c.id) }}" class="btn btn-sm btn-secondary" style="font-size: 0.82rem; padding: 0.25rem 0.6rem;">
+                  Open Control Room &rarr;
+                </a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Administrative Expansion: Add City & Add Ward -->
+  <div class="grid-2" id="add-city-section" style="margin-bottom: 2rem;">
+    <!-- Add City Form -->
+    <div class="card">
+      <div class="card-header">
+        <h4>Register New Indian City</h4>
+      </div>
+      <form method="POST" action="{{ url_for('admin.super_add_city') }}">
+        <div class="form-row">
+          <div class="form-col form-group">
+            <label for="state_name" style="font-size: 0.85rem;">State / UT Name *</label>
+            <input type="text" id="state_name" name="state_name" class="form-control" required placeholder="e.g. Maharashtra">
+          </div>
+          <div class="form-col form-group">
+            <label for="city_name" style="font-size: 0.85rem;">City Name *</label>
+            <input type="text" id="city_name" name="city_name" class="form-control" required placeholder="e.g. Nashik">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-col form-group">
+            <label for="climate_zone" style="font-size: 0.85rem;">Climate Zone *</label>
+            <select id="climate_zone" name="climate_zone" class="form-control" required>
+              <option value="plains">Plains (Gangetic / Deccan)</option>
+              <option value="coastal">Coastal (High Humidity)</option>
+              <option value="hill">Hill / Mountain (Low Heat Tolerance)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-col form-group">
+            <label for="latitude" style="font-size: 0.85rem;">Latitude *</label>
+            <input type="text" id="latitude" name="latitude" class="form-control" required placeholder="e.g. 19.9975">
+          </div>
+          <div class="form-col form-group">
+            <label for="longitude" style="font-size: 0.85rem;">Longitude *</label>
+            <input type="text" id="longitude" name="longitude" class="form-control" required placeholder="e.g. 73.7898">
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; font-size: 0.88rem;">Add City to Network</button>
+      </form>
+    </div>
+
+    <!-- Add Ward Form -->
+    <div class="card">
+      <div class="card-header">
+        <h4>Register Municipal Ward</h4>
+      </div>
+      <form method="POST" action="{{ url_for('admin.super_add_ward') }}">
+        <div class="form-group">
+          <label for="target_city_id" style="font-size: 0.85rem;">Select City *</label>
+          <select id="target_city_id" name="city_id" class="form-control" required>
+            {% for c in cities %}
+              <option value="{{ c.id }}">{{ c.name }} ({{ c.state }})</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="ward_name" style="font-size: 0.85rem;">Ward Name / Division *</label>
+          <input type="text" id="ward_name" name="ward_name" class="form-control" required placeholder="e.g. Ward 12, Gandhi Nagar">
+        </div>
+
+        <div class="form-row">
+          <div class="form-col form-group">
+            <label for="ward_lat" style="font-size: 0.85rem;">Ward Latitude</label>
+            <input type="text" id="ward_lat" name="latitude" class="form-control" placeholder="Optional center lat">
+          </div>
+          <div class="form-col form-group">
+            <label for="ward_lon" style="font-size: 0.85rem;">Ward Longitude</label>
+            <input type="text" id="ward_lon" name="longitude" class="form-control" placeholder="Optional center lon">
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-secondary" style="width: 100%; font-size: 0.88rem;">Add Ward</button>
+      </form>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  // Initialize Pan-India Leaflet Map
+  const map = L.map("india-map").setView([22.5, 78.9], 5);
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 18,
+    attribution: '&copy; OpenStreetMap contributors'
+  }).addTo(map);
+
+  const markers = {{ map_markers|tojson }};
+  markers.forEach(function (m) {
+    let color = "#2F7D4F"; // Green
+    if (m.level === "Red") color = "#B42318";
+    else if (m.level === "Orange") color = "#C2410C";
+
+    const circle = L.circleMarker([m.lat, m.lon], {
+      radius: 8,
+      fillColor: color,
+      color: "#FFFFFF",
+      weight: 2,
+      opacity: 1,
+      fillOpacity: 0.9
+    }).addTo(map);
+
+    circle.bindPopup(`
+      <strong>${m.name}</strong> (${m.state})<br>
+      Alert Level: <strong style="color:${color};">${m.level.toUpperCase()}</strong><br>
+      Heat Index: <strong>${m.heat_index}°C</strong><br>
+      Households: ${m.households} | Volunteers: ${m.volunteers}<br>
+      Open SOS: ${m.open_sos}<br>
+      <a href="/admin/dashboard?city_id=${m.id}" style="color:#C2410C; font-weight:bold;">Open Ward Control Room &rarr;</a>
+    `);
+  });
+});
+
+function sortTable(n) {
+  var table = document.getElementById("citiesTable");
+  var rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+  switching = true;
+  dir = "asc";
+  while (switching) {
+    switching = false;
+    rows = table.rows;
+    for (i = 1; i < (rows.length - 1); i++) {
+      shouldSwitch = false;
+      x = rows[i].getElementsByTagName("TD")[n];
+      y = rows[i + 1].getElementsByTagName("TD")[n];
+      var xVal = x.textContent.trim().toLowerCase();
+      var yVal = y.textContent.trim().toLowerCase();
+      var xNum = parseFloat(xVal.replace(/[^0-9.-]/g, ''));
+      var yNum = parseFloat(yVal.replace(/[^0-9.-]/g, ''));
+      if (!isNaN(xNum) && !isNaN(yNum)) {
+        if (dir == "asc" && xNum > yNum) { shouldSwitch = true; break; }
+        if (dir == "desc" && xNum < yNum) { shouldSwitch = true; break; }
+      } else {
+        if (dir == "asc" && xVal > yVal) { shouldSwitch = true; break; }
+        if (dir == "desc" && xVal < yVal) { shouldSwitch = true; break; }
+      }
+    }
+    if (shouldSwitch) {
+      rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+      switching = true;
+      switchcount++;
+    } else {
+      if (switchcount == 0 && dir == "asc") {
+        dir = "desc";
+        switching = true;
+      }
+    }
+  }
+}
+</script>
+{% endblock %}

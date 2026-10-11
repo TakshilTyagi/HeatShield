@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}Cooling Centres Management - HeatShield Admin{% endblock %}
+
+{% block content %}
+<div>
+  <div class="card-header" style="border:none; padding:0; margin-bottom: 1.25rem;">
+    <h2>Cooling Centres & Hydration Points Management</h2>
+    <p style="color: var(--text-muted); font-size: 0.95rem;">
+      Manage community shelters, emergency cold wards, and water kiosks. Update live occupancy and toggle operational status.
+    </p>
+  </div>
+
+  <div class="grid-2" style="align-items: flex-start; margin-bottom: 1.5rem;">
+    
+    <!-- Register New Cooling Facility -->
+    <div class="card">
+      <div class="card-header">
+        <h3>Register New Facility</h3>
+      </div>
+      <form method="POST" action="{{ url_for('admin.cooling_centres') }}">
+        <input type="hidden" name="action" value="add">
+
+        <div class="form-group">
+          <label for="name">Facility Name *</label>
+          <input type="text" id="name" name="name" class="form-control" required placeholder="e.g. Quila Community Hall">
+        </div>
+
+        <div class="form-row">
+          <div class="form-col form-group">
+            <label for="point_type">Type *</label>
+            <select id="point_type" name="point_type" class="form-control" required>
+              <option value="shelter">Cooling Shelter</option>
+              <option value="water_kiosk">Water / Jal Kiosk</option>
+              <option value="hospital">Cold Ward / Clinic</option>
+            </select>
+          </div>
+          <div class="form-col form-group">
+            <label for="ward">Ward *</label>
+            <select id="ward" name="ward" class="form-control" required>
+              {% for w in wards %}
+                <option value="{{ w }}">{{ w }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="address">Address / Street Landmark</label>
+          <input type="text" id="address" name="address" class="form-control" required placeholder="e.g. Near Chowk Bazar">
+        </div>
+
+        <div class="form-row">
+          <div class="form-col form-group">
+            <label for="latitude">Latitude</label>
+            <input type="text" id="latitude" name="latitude" class="form-control" value="28.3667" required>
+          </div>
+          <div class="form-col form-group">
+            <label for="longitude">Longitude</label>
+            <input type="text" id="longitude" name="longitude" class="form-control" value="79.4317" required>
+          </div>
+          <div class="form-col form-group">
+            <label for="capacity">Capacity (Persons)</label>
+            <input type="number" id="capacity" name="capacity" class="form-control" value="50" min="1" required>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%;">Add Cooling Facility</button>
+      </form>
+    </div>
+
+    <!-- Active Facilities Directory -->
+    <div class="card">
+      <div class="card-header">
+        <h3>Operational Facilities ({{ centres|length }})</h3>
+      </div>
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Facility</th>
+              <th>Ward</th>
+              <th>Occupancy / Cap</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in centres %}
+              <tr>
+                <td>
+                  <strong>{{ c.name }}</strong>
+                  <div style="font-size: 0.78rem; color: var(--text-muted);">{{ c.point_type.replace('_', ' ').title() }}</div>
+                </td>
+                <td>{{ c.ward }}</td>
+                <td>
+                  <form method="POST" action="{{ url_for('admin.cooling_centres') }}" style="display: flex; gap: 0.3rem; align-items: center;">
+                    <input type="hidden" name="action" value="update_occupancy">
+                    <input type="hidden" name="id" value="{{ c.id }}">
+                    <input type="number" name="occupancy" value="{{ c.occupancy }}" min="0" max="{{ c.capacity }}" style="width: 55px; font-size: 0.8rem; padding: 0.2rem;">
+                    <span style="font-size: 0.8rem;">/ {{ c.capacity }}</span>
+                    <button type="submit" class="btn-toggle" style="padding: 0.15rem 0.4rem; font-size: 0.75rem;">Set</button>
+                  </form>
+                </td>
+                <td>
+                  {% if c.is_open %}
+                    <span class="chip chip-green">Open</span>
+                  {% else %}
+                    <span class="chip chip-muted">Closed</span>
+                  {% endif %}
+                </td>
+                <td>
+                  <form method="POST" action="{{ url_for('admin.cooling_centres') }}">
+                    <input type="hidden" name="action" value="toggle_open">
+                    <input type="hidden" name="id" value="{{ c.id }}">
+                    <button type="submit" class="btn-toggle" style="font-size: 0.78rem;">
+                      {% if c.is_open %}Close{% else %}Open{% endif %}
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

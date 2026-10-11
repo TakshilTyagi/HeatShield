@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Extreme Heat Safety Guide - HeatShield{% endblock %}
+
+{% block content %}
+<div style="max-width: 840px; margin: 1rem auto;">
+  <div class="card-header" style="border:none; padding:0; margin-bottom: 1.5rem;">
+    <h2>Heatwave Safety & First Aid Guide</h2>
+    <p style="color: var(--text-muted); font-size: 1rem;">
+      Essential guidance for families, seniors, and community volunteers during peak summer months.
+    </p>
+  </div>
+
+  <div class="grid-2">
+    <!-- Heat Exhaustion vs Heat Stroke -->
+    <div class="card" style="border-left: 5px solid var(--status-orange);">
+      <h3 style="color: var(--status-orange);">1. Heat Exhaustion (Warning Phase)</h3>
+      <p style="font-size: 0.9rem; color: var(--text-muted);">Occurs due to heavy sweating without adequate water/electrolyte replacement.</p>
+      <ul style="padding-left: 1.25rem; font-size: 0.92rem; line-height: 1.6;">
+        <li>Heavy sweating, cold pale clammy skin</li>
+        <li>Rapid, weak pulse and dizziness</li>
+        <li>Nausea, muscle cramps, and extreme fatigue</li>
+        <li>Headache and dark urine</li>
+      </ul>
+      <div style="margin-top: 0.75rem; padding: 0.6rem; background: #FFFBEB; border-radius: 4px; font-size: 0.88rem;">
+        <strong>Action:</strong> Move to shade, loosen clothing, sip salted water or ORS slowly.
+      </div>
+    </div>
+
+    <div class="card" style="border-left: 5px solid var(--status-red);">
+      <h3 style="color: var(--status-red);">2. Heatstroke (Medical Emergency)</h3>
+      <p style="font-size: 0.9rem; color: var(--text-muted);">Body thermoregulation fails; core temperature reaches &gt;40°C.</p>
+      <ul style="padding-left: 1.25rem; font-size: 0.92rem; line-height: 1.6;">
+        <li>High body temperature (&gt;103°F / 39.5°C)</li>
+        <li>Hot, red, dry skin (sweating has halted)</li>
+        <li>Confusion, slurred speech, or delirium</li>
+        <li>Loss of consciousness or convulsions</li>
+      </ul>
+      <div style="margin-top: 0.75rem; padding: 0.6rem; background: #FEE4E2; border-radius: 4px; font-size: 0.88rem;">
+        <strong>Immediate Action:</strong> Call 108 ambulance, press SOS, soak victim in cold water.
+      </div>
+    </div>
+  </div>
+
+  <!-- Safe Hours & Housing Modifications -->
+  <div class="card">
+    <h3>Safe Hours & Daily Routine</h3>
+    <div class="table-wrapper" style="margin-top: 0.75rem;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Time Window</th>
+            <th>Solar Exposure</th>
+            <th>Recommended Activity for High-Risk Groups</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>05:30 AM – 09:30 AM</strong></td>
+            <td>Low</td>
+            <td>Safest window for market shopping, outdoor chores, manual labour, and ventilation of home.</td>
+          </tr>
+          <tr>
+            <td><strong>10:00 AM – 04:30 PM</strong></td>
+            <td>Extreme Danger</td>
+            <td><strong>Stay indoors.</strong> Avoid direct sun. Tin-roof residents should move to neighborhood shelters or shaded verandas.</td>
+          </tr>
+          <tr>
+            <td><strong>05:00 PM – 08:00 PM</strong></td>
+            <td>Moderate Heat Trap</td>
+            <td>Hydrate with electrolytes. Check on elderly neighbors living alone.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Traditional Cooling Practices -->
+  <div class="card">
+    <h3>Evidence-Based Home Cooling Tips</h3>
+    <ul style="padding-left: 1.25rem; font-size: 0.95rem; line-height: 1.6;">
+      <li><strong>Tin & Asbestos Roof Mitigation:</strong> Cover the top of tin roofs with dry straw, burlap sacks, or painted white lime wash to reflect 70% of radiant solar heat.</li>
+      <li><strong>Wet Cotton Drape:</strong> Place a damp cotton towel around the back of the neck and on pulse points (wrists, temples) to speed up evaporative cooling.</li>
+      <li><strong>Oral Rehydration Solution (ORS):</strong> Stir 1 packet of standard WHO-formula ORS into 1 litre of clean drinking water. Alternatively: 1 litre water + 6 teaspoons sugar + 1/2 teaspoon salt.</li>
+      <li><strong>Avoid Caffeinated & Sugary Drinks:</strong> Alcohol, tea, and sweetened carbonated drinks increase kidney fluid loss through diuresis.</li>
+    </ul>
+  </div>
+
+</div>
+{% endblock %}

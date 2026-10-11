@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Internal Server Error (500) - HeatShield{% endblock %}
+
+{% block content %}
+<div style="max-width: 520px; margin: 3rem auto; text-align: center;">
+  <div class="card" style="padding: 2.5rem 1.5rem; border-color: var(--status-red);">
+    <h1 style="font-size: 3rem; color: var(--status-red); margin-bottom: 0.5rem;">500</h1>
+    <h2>System Error</h2>
+    <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+      The municipal application encountered an unexpected internal error. System logs have recorded the occurrence.
+    </p>
+    <a href="{{ url_for('auth.home') }}" class="btn btn-secondary">Return to Homepage</a>
+  </div>
+</div>
+{% endblock %}

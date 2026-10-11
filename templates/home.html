@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}HeatShield - Municipal Community Heatwave Protection Network{% endblock %}
+
+{% block content %}
+<div style="max-width: 860px; margin: 1.5rem auto;">
+
+  <!-- Civic Notice Header (Text-First, Serif Headline, Sun-and-Shield SVG) -->
+  <div class="card" style="border-left: 6px solid var(--accent); padding: 1.75rem;">
+    <div style="display: flex; align-items: flex-start; gap: 1.25rem; flex-wrap: wrap;">
+      <div style="flex-shrink: 0; padding: 0.5rem; background: var(--bg-subtle); border: 1px solid var(--border-color); border-radius: var(--radius-sm);">
+        <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" style="width: 44px; height: 44px;" aria-label="Sun and Shield Symbol">
+          <circle cx="20" cy="14" r="8" fill="#C2410C"/>
+          <path d="M20 2V6M20 22V26M8 14H12M28 14H32M11.5 5.5L14.3 8.3M25.7 19.7L28.5 22.5M11.5 22.5L14.3 19.7M25.7 8.3L28.5 5.5" stroke="#C2410C" stroke-width="2" stroke-linecap="round"/>
+          <path d="M12 18C12 28 20 34 20 34C20 34 28 28 28 18V12H12V18Z" fill="#FAF7F2" stroke="#1F1D1A" stroke-width="2"/>
+          <path d="M16 20L19 23L24 17" stroke="#2F7D4F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div style="flex: 1; min-width: 260px;">
+        <span class="chip chip-muted" style="margin-bottom: 0.4rem;">Municipal Heat Action Public Notice</span>
+        <h1 style="font-size: 2.1rem; line-height: 1.2; margin-bottom: 0.5rem;">
+          Community Heatwave Protection Network
+        </h1>
+        <p style="font-size: 1.05rem; line-height: 1.55; color: var(--text-main); margin-bottom: 0;">
+          A direct municipal-to-neighbourhood dispatch system connecting vulnerable residents, field volunteers, and ward administrators during severe heatwaves across India.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- The Problem in 3 Plain Sentences -->
+  <div class="card" style="padding: 1.5rem;">
+    <div class="card-header">
+      <h2>The Problem</h2>
+      <span class="chip chip-red">Public Health Risk</span>
+    </div>
+    <p style="font-size: 1.05rem; line-height: 1.6; margin-bottom: 0.6rem;">
+      During severe Indian summer heatwaves, elderly residents living alone, outdoor manual labourers, and families living under uninsulated tin or asbestos roofs face life-threatening heatstroke without anyone knowing their immediate condition.
+    </p>
+    <p style="font-size: 1.05rem; line-height: 1.6; margin-bottom: 0.6rem;">
+      Dense urban settlements turn unventilated rooms into extreme heat traps where daytime indoor temperatures routinely exceed outdoor ambient air.
+    </p>
+    <p style="font-size: 1.05rem; line-height: 1.6; margin-bottom: 0;">
+      Traditional municipal advisories remain passive public broadcasts that fail to identify exactly which vulnerable households require urgent welfare visits, oral rehydration salts, or emergency medical evacuation today.
+    </p>
+  </div>
+
+  <!-- How HeatShield Works in 3 Steps -->
+  <div style="margin: 2rem 0 1rem 0;">
+    <h2>How HeatShield Works</h2>
+    <p style="color: var(--text-muted); font-size: 0.95rem;">Three coordinated operational steps executed daily in every monitored ward.</p>
+  </div>
+
+  <div class="grid-3" style="margin-bottom: 2rem;">
+    <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+      <div>
+        <div class="chip chip-muted" style="margin-bottom: 0.6rem;">Step 1</div>
+        <h3 style="margin-bottom: 0.4rem;">Triage & Risk Scoring</h3>
+        <p style="font-size: 0.92rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 0;">
+          Every registered resident is scored by physiological and housing vulnerability factors: age 60+, living alone, tin or asbestos roofing, outdoor physical work, and chronic health conditions.
+        </p>
+      </div>
+    </div>
+
+    <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+      <div>
+        <div class="chip chip-muted" style="margin-bottom: 0.6rem;">Step 2</div>
+        <h3 style="margin-bottom: 0.4rem;">Single-Tap Check-ins & SOS</h3>
+        <p style="font-size: 0.92rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 0;">
+          Residents tap "I'm okay" each morning. If an unattended senior misses check-in by the 12:00 PM cutoff on a Red heat day or triggers SOS, they are instantly flagged at the top of the visit queue.
+        </p>
+      </div>
+    </div>
+
+    <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+      <div>
+        <div class="chip chip-muted" style="margin-bottom: 0.6rem;">Step 3</div>
+        <h3 style="margin-bottom: 0.4rem;">Dispatched Field Visits</h3>
+        <p style="font-size: 0.92rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 0;">
+          Ward volunteers receive mobile-optimized visit routes sorted by vulnerability and distance to deliver ORS packets, cold drinking water, and coordinate immediate cooling centre evacuation.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Entry Actions & Seeded Accounts Table -->
+  <div class="card" style="background: #FFFFFF;">
+    <div class="card-header">
+      <h3>System Access & Prototype Verification</h3>
+      <span class="chip chip-green">Ready to Test</span>
+    </div>
+
+    <p style="font-size: 0.95rem; margin-bottom: 1.25rem;">
+      Log in with an existing account or register a new resident or volunteer profile for your city:
+    </p>
+
+    <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.75rem;">
+      <a href="{{ url_for('auth.login') }}" class="btn btn-primary" style="flex: 1; min-width: 220px;">
+        Sign In to Your Account
+      </a>
+      <a href="{{ url_for('auth.register') }}" class="btn btn-secondary" style="flex: 1; min-width: 220px;">
+        Register as Resident or Volunteer
+      </a>
+    </div>
+
+    <h4 style="font-size: 0.85rem; margin-bottom: 0.6rem;">Seeded Evaluation Credentials (All India):</h4>
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Role</th>
+            <th>Username</th>
+            <th>Password</th>
+            <th>Operational Purpose</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Super Admin</strong></td>
+            <td><code>superadmin</code></td>
+            <td><code>admin123</code></td>
+            <td>Pan-India oversight: multi-city monitoring, climate zones, global demo switch</td>
+          </tr>
+          <tr>
+            <td><strong>Ward Admin (Plains)</strong></td>
+            <td><code>admin</code></td>
+            <td><code>admin123</code></td>
+            <td>Municipal control room, heat map, broadcast alerts, demo mode override</td>
+          </tr>
+          <tr>
+            <td><strong>Ward Admin (Desert/Arid)</strong></td>
+            <td><code>admin_jaipur</code></td>
+            <td><code>admin123</code></td>
+            <td>City control room, high-temperature triage, cooling shelters</td>
+          </tr>
+          <tr>
+            <td><strong>Field Volunteer A</strong></td>
+            <td><code>vol_amit</code></td>
+            <td><code>vol123</code></td>
+            <td>Ward visits, missed check-in prioritization, ORS delivery recording</td>
+          </tr>
+          <tr>
+            <td><strong>Field Volunteer B</strong></td>
+            <td><code>vol_vikram</code></td>
+            <td><code>vol123</code></td>
+            <td>Assigned household visits, desert climate field triage</td>
+          </tr>
+          <tr>
+            <td><strong>High-Risk Resident</strong></td>
+            <td><code>res_ram</code></td>
+            <td><code>res123</code></td>
+            <td>Age 78, tin roof, lives alone &mdash; priority missed check-in testing</td>
+          </tr>
+          <tr>
+            <td><strong>Resident (Ready to Check-in)</strong></td>
+            <td><code>res_shanti</code></td>
+            <td><code>res123</code></td>
+            <td>Age 68 &mdash; test the single-tap "I'm okay" daily confirmation</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

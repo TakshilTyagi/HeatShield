@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Cooling & Water Points - HeatShield{% endblock %}
+
+{% block content %}
+<div>
+  <div class="card-header" style="border:none; padding:0; margin-bottom: 1rem;">
+    <h2>Cooling Centres & Water Kiosks Map</h2>
+    <p style="color: var(--text-muted); font-size: 0.95rem;">
+      Public hydration points, shaded municipal shelters, and emergency cold wards across {{ city.name if city else city_name }}.
+    </p>
+  </div>
+
+  <!-- Leaflet Map Container -->
+  <div id="cooling-map" class="map-container" style="height: 420px; margin-bottom: 1.5rem;"></div>
+
+  <!-- Cooling Points Directory List -->
+  <div class="card">
+    <div class="card-header">
+      <h3>Active Hydration & Medical Aid Points</h3>
+      <span class="chip chip-green">{{ cooling_points|length }} Facilities Open</span>
+    </div>
+
+    <div class="table-wrapper">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Facility Name</th>
+            <th>Type</th>
+            <th>Ward</th>
+            <th>Address</th>
+            <th>Capacity</th>
+            <th>Current Occupancy</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for cp in cooling_points %}
+            <tr>
+              <td><strong>{{ cp.name }}</strong></td>
+              <td>
+                {% if cp.point_type == 'shelter' %}
+                  <span class="chip chip-orange">Cool Shelter</span>
+                {% elif cp.point_type == 'hospital' %}
+                  <span class="chip chip-red">Cold Ward / Clinic</span>
+                {% else %}
+                  <span class="chip chip-green">Water Kiosk</span>
+                {% endif %}
+              </td>
+              <td>{{ cp.ward }}</td>
+              <td>{{ cp.address }}</td>
+              <td>{{ cp.capacity }} persons</td>
+              <td>{{ cp.occupancy }} persons</td>
+              <td>
+                <span class="chip chip-green">Open</span>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const mapCenterLat = {{ (city.latitude if city and city.latitude else 28.3667) }};
+  const mapCenterLon = {{ (city.longitude if city and city.longitude else 79.4317) }};
+  const map = L.map("cooling-map").setView([mapCenterLat, mapCenterLon], 13);
+
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 18,
+    attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+  }).addTo(map);
+
+  const points = {{ cooling_points|tojson }};
+  points.forEach(function (p) {
+    let color = "#2F7D4F"; // green water kiosk
+    if (p.point_type === "shelter") color = "#C2410C"; // orange
+    if (p.point_type === "hospital") color = "#B42318"; // red
+
+    const marker = L.circleMarker([p.latitude, p.longitude], {
+      radius: 9,
+      fillColor: color,
+      color: "#FFFFFF",
+      weight: 2,
+      opacity: 1,
+      fillOpacity: 0.85
+    }).addTo(map);
+
+    marker.bindPopup(`
+      <strong>${p.name}</strong><br>
+      Ward: ${p.ward}<br>
+      Type: ${p.point_type.replace('_', ' ').toUpperCase()}<br>
+      Address: ${p.address}<br>
+      Capacity: ${p.capacity} (Occupancy: ${p.occupancy})
+    `);
+  });
+});
+</script>
+{% endblock %}

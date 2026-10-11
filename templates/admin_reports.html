@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block title %}Operational Reports & CSV - HeatShield Admin{% endblock %}
+
+{% block content %}
+<div style="max-width: 860px; margin: 0 auto;">
+  <div class="card-header" style="border:none; padding:0; margin-bottom: 1.25rem; display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem;">
+    <div>
+      <h2>Heatwave Response Performance Reports</h2>
+      <p style="color: var(--text-muted); font-size: 0.95rem;">
+        Consolidated metrics on volunteer field check-ins, emergency response intervals, and relief distributions.
+      </p>
+    </div>
+    <a href="{{ url_for('admin.download_csv') }}" class="btn btn-primary" style="font-size: 0.9rem;">
+      &#128190; Download Complete Visits Log (CSV)
+    </a>
+  </div>
+
+  <!-- KPI Summary Cards -->
+  <div class="grid-3" style="margin-bottom: 1.5rem;">
+    <div class="metric-card">
+      <div class="metric-label">Total Household Visits Logged</div>
+      <div class="metric-val">{{ total_visits }}</div>
+      <div style="font-size: 0.8rem; color: var(--text-muted);">Cumulative welfare visits completed</div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-label">SOS Alarms Received</div>
+      <div class="metric-val" style="color: var(--status-orange);">{{ total_sos }}</div>
+      <div style="font-size: 0.8rem; color: var(--text-muted);">Community distress beacons</div>
+    </div>
+
+    <div class="metric-card">
+      <div class="metric-label">Avg SOS Response Time</div>
+      <div class="metric-val" style="color: var(--status-green);">{{ avg_response }} <span style="font-size: 1rem; font-weight: normal;">min</span></div>
+      <div style="font-size: 0.8rem; color: var(--text-muted);">From beacon creation to field resolution</div>
+    </div>
+  </div>
+
+  <!-- Relief Supplies Distribution -->
+  <div class="card">
+    <div class="card-header">
+      <h3>Hydration & Relief Supplies Distributed</h3>
+    </div>
+    {% if supplies_summary %}
+      <div class="table-wrapper">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Supply Category</th>
+              <th>Total Units Distributed</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in supplies_summary %}
+              <tr>
+                <td><strong>{{ s.supplies_given.replace('_', ' + ').upper() }}</strong></td>
+                <td>{{ s.cnt }} batches</td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <p style="color: var(--text-muted); font-size: 0.95rem;">No relief supplies logged yet.</p>
+    {% endif %}
+  </div>
+
+  <!-- Export Documentation Card -->
+  <div class="card" style="background: #FAF8F5;">
+    <h4>Data Export & Accountability</h4>
+    <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0;">
+      The downloadable CSV export includes anonymized timestamps, volunteer identities, ward boundaries, distress indicators, and field notes for municipal auditing and disaster mitigation reporting.
+    </p>
+  </div>
+</div>
+{% endblock %}

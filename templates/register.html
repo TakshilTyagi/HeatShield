@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block title %}Register - HeatShield Pan-India Network{% endblock %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 1.5rem auto;">
+  <div class="card">
+    <div class="card-header">
+      <h2>Register Account</h2>
+    </div>
+
+    <form method="POST" action="{{ url_for('auth.register') }}">
+      <div class="form-row">
+        <div class="form-col form-group">
+          <label for="username">Username *</label>
+          <input type="text" id="username" name="username" class="form-control" required placeholder="Choose a username">
+        </div>
+        <div class="form-col form-group">
+          <label for="password">Password *</label>
+          <input type="password" id="password" name="password" class="form-control" required placeholder="Choose a password">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-col form-group">
+          <label for="name">Full Name *</label>
+          <input type="text" id="name" name="name" class="form-control" required placeholder="e.g. Ramesh Kumar">
+        </div>
+        <div class="form-col form-group">
+          <label for="phone">Indian Mobile Number (+91) *</label>
+          <input type="tel" id="phone" name="phone" class="form-control" required placeholder="+91 9876543210" pattern="^(\+91[\-\s]?)?[6-9]\d{9}$">
+          <small style="font-size:0.75rem; color:var(--text-muted);">10-digit mobile number starting with 6, 7, 8, or 9.</small>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="role">Register As *</label>
+        <select id="role" name="role" class="form-control" required>
+          <option value="resident">Resident / Household (Receive heat assistance)</option>
+          <option value="volunteer">Field Volunteer (Deliver hydration & check-ins)</option>
+        </select>
+      </div>
+
+      <!-- State > City > Ward Hierarchy -->
+      <div class="form-row">
+        <div class="form-col form-group">
+          <label for="state_select">State / UT *</label>
+          <select id="state_select" class="form-control" required onchange="onStateChange(this.value)">
+            <option value="">-- Select State --</option>
+            {% for s in states %}
+              <option value="{{ s['id'] }}">{{ s['name'] }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-col form-group">
+          <label for="city_select">City *</label>
+          <select id="city_select" name="city_id" class="form-control" required onchange="onCityChange(this.value)">
+            <option value="">-- Select City First --</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-col form-group">
+          <label for="ward_select">Municipal Ward *</label>
+          <select id="ward_select" name="ward_id" class="form-control" onchange="onWardChange(this.value)">
+            <option value="">-- Select Ward --</option>
+          </select>
+        </div>
+        <div class="form-col form-group" id="custom_ward_wrapper" style="display: none;">
+          <label for="custom_ward">Enter Your Ward Name</label>
+          <input type="text" id="custom_ward" name="custom_ward" class="form-control" placeholder="Ward name (pending approval)">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="address">Address / Street Location *</label>
+        <input type="text" id="address" name="address" class="form-control" required placeholder="House number, landmark, lane, colony">
+      </div>
+
+      <div class="form-row">
+        <div class="form-col form-group">
+          <label for="latitude">Latitude</label>
+          <input type="text" id="latitude" name="latitude" class="form-control" placeholder="e.g. 28.3667">
+        </div>
+        <div class="form-col form-group">
+          <label for="longitude">Longitude</label>
+          <input type="text" id="longitude" name="longitude" class="form-control" placeholder="e.g. 79.4317">
+        </div>
+      </div>
+
+      <div style="margin-bottom: 1.25rem;">
+        <button type="button" class="btn btn-secondary btn-use-location" style="font-size: 0.85rem; padding: 0.35rem 0.75rem;">
+          Use My GPS Location
+        </button>
+        <span id="geo-status" style="font-size: 0.8rem; color: var(--text-muted); margin-left: 0.5rem;"></span>
+      </div>
+
+      <button type="submit" class="btn btn-primary" style="width: 100%;">Create Account</button>
+    </form>
+  </div>
+</div>
+
+<script>
+let cityDataMap = {};
+
+function onStateChange(stateId) {
+  const citySelect = document.getElementById("city_select");
+  const wardSelect = document.getElementById("ward_select");
+  citySelect.innerHTML = '<option value="">Loading cities...</option>';
+  wardSelect.innerHTML = '<option value="">-- Select City First --</option>';
+
+  if (!stateId) {
+    citySelect.innerHTML = '<option value="">-- Select State First --</option>';
+    return;
+  }
+
+  fetch(`/api/locations/cities?state_id=${stateId}`)
+    .then(r => r.json())
+    .then(cities => {
+      cityDataMap = {};
+      citySelect.innerHTML = '<option value="">-- Select City --</option>';
+      cities.forEach(c => {
+        cityDataMap[c.id] = c;
+        const opt = document.createElement("option");
+        opt.value = c.id;
+        opt.textContent = `${c.name} (${c.climate_zone})`;
+        citySelect.appendChild(opt);
+      });
+    })
+    .catch(() => {
+      citySelect.innerHTML = '<option value="">Error loading cities</option>';
+    });
+}
+
+function onCityChange(cityId) {
+  const wardSelect = document.getElementById("ward_select");
+  wardSelect.innerHTML = '<option value="">Loading wards...</option>';
+
+  if (cityDataMap[cityId]) {
+    const c = cityDataMap[cityId];
+    if (c.latitude) document.getElementById("latitude").value = c.latitude;
+    if (c.longitude) document.getElementById("longitude").value = c.longitude;
+  }
+
+  if (!cityId) {
+    wardSelect.innerHTML = '<option value="">-- Select City First --</option>';
+    return;
+  }
+
+  fetch(`/api/locations/wards?city_id=${cityId}`)
+    .then(r => r.json())
+    .then(wards => {
+      wardSelect.innerHTML = '<option value="">-- Select Ward --</option>';
+      wards.forEach(w => {
+        const opt = document.createElement("option");
+        opt.value = w.id;
+        opt.textContent = w.name;
+        wardSelect.appendChild(opt);
+      });
+      const notListed = document.createElement("option");
+      notListed.value = "not_listed";
+      notListed.textContent = "Not listed (Add pending ward)";
+      wardSelect.appendChild(notListed);
+    })
+    .catch(() => {
+      wardSelect.innerHTML = '<option value="">Error loading wards</option>';
+    });
+}
+
+function onWardChange(val) {
+  const customDiv = document.getElementById("custom_ward_wrapper");
+  if (val === "not_listed") {
+    customDiv.style.display = "block";
+  } else {
+    customDiv.style.display = "none";
+  }
+}
+</script>
+{% endblock %}

@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Broadcast Heat Alerts - HeatShield Admin{% endblock %}
+
+{% block content %}
+<div style="max-width: 860px; margin: 0 auto;">
+  <div class="card-header" style="border:none; padding:0; margin-bottom: 1.25rem;">
+    <h2>Broadcast Heat Alerts & Ward Warnings</h2>
+    <p style="color: var(--text-muted); font-size: 0.95rem;">
+      Send targeted SMS and dashboard warnings to residents and volunteers. Integrated with Amazon SNS for real-time mobile push.
+    </p>
+  </div>
+
+  <div class="grid-2" style="align-items: flex-start; margin-bottom: 1.5rem;">
+    
+    <!-- Compose Broadcast Alert Form -->
+    <div class="card">
+      <div class="card-header">
+        <h3>Compose Heat Advisory</h3>
+      </div>
+      <form method="POST" action="{{ url_for('admin.alerts') }}">
+        <div class="form-group">
+          <label for="title">Advisory Title *</label>
+          <input type="text" id="title" name="title" class="form-control" required value="Severe Heatwave Warning - Stage 2">
+        </div>
+
+        <div class="form-row">
+          <div class="form-col form-group">
+            <label for="heat_level">Heat Severity Level</label>
+            <select id="heat_level" name="heat_level" class="form-control">
+              <option value="Orange">Orange Alert (High Caution)</option>
+              <option value="Red" selected>Red Emergency (Severe Heatwave)</option>
+              <option value="Green">Green (Normal / Advisory Lifted)</option>
+            </select>
+          </div>
+          <div class="form-col form-group">
+            <label for="target_ward">Target Municipal Ward</label>
+            <select id="target_ward" name="target_ward" class="form-control">
+              <option value="All">All Wards (City-Wide)</option>
+              {% for w in wards %}
+                <option value="{{ w }}">{{ w }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="message">Alert Message Body *</label>
+          <textarea id="message" name="message" class="form-control" rows="4" required placeholder="State actionable safety instructions, safe hours, and public water kiosk availability..."></textarea>
+          <small style="color: var(--text-muted); font-size: 0.8rem;">
+            Will be published to dashboards and sent via Amazon SNS SMS to registered residents.
+          </small>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%;">
+          Send Broadcast via Amazon SNS
+        </button>
+      </form>
+    </div>
+
+    <!-- Past Broadcast History -->
+    <div class="card">
+      <div class="card-header">
+        <h3>Broadcast Dispatch Log ({{ alerts|length }})</h3>
+      </div>
+      {% if alerts %}
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Time & Title</th>
+                <th>Ward</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for a in alerts %}
+                <tr>
+                  <td>
+                    <strong>{{ a.title }}</strong>
+                    <div style="font-size: 0.78rem; color: var(--text-muted);">{{ a.created_at }}</div>
+                    <p style="font-size: 0.82rem; margin-top: 0.2rem; margin-bottom: 0;">{{ a.message[:60] }}...</p>
+                  </td>
+                  <td>{{ a.target_ward }}</td>
+                  <td>
+                    <span class="chip {% if a.dispatch_status == 'sent' %}chip-green{% else %}chip-muted{% endif %}">
+                      {{ a.dispatch_status.upper() }}
+                    </span>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <p style="color: var(--text-muted); font-size: 0.95rem;">No alerts sent yet.</p>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}
