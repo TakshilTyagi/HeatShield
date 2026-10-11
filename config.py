@@ -5,7 +5,9 @@ class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY", "heatshield-secret-key-all-india-2026")
     
     BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-    DB_PATH = os.path.join(BASE_DIR, "heatshield.db")
+    # Production / Container default: DATABASE_PATH env var, defaulting to /tmp/heatshield.db in production
+    default_db = "/tmp/heatshield.db" if (os.environ.get("ENV") == "production" or os.name != "nt") else os.path.join(BASE_DIR, "heatshield.db")
+    DB_PATH = os.environ.get("DATABASE_PATH", default_db)
     
     # Daily automated heat check secret token for Cron / Lambda / EventBridge
     HEAT_CHECK_TOKEN = os.environ.get("HEAT_CHECK_TOKEN", "hs-daily-token-all-india-secure")
@@ -14,6 +16,8 @@ class Config:
     SESSION_PERMANENT = False
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = "Lax"
+    # Secure session cookies behind HTTPS (enabled in production or when HTTPS proxy is present)
+    SESSION_COOKIE_SECURE = os.environ.get("SESSION_COOKIE_SECURE", "false").lower() in ("true", "1") or os.environ.get("ENV") == "production"
     
     # Weather caching & network constraints
     WEATHER_CACHE_MINUTES = int(os.environ.get("WEATHER_CACHE_MINUTES", 30))

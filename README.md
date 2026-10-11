@@ -1,5 +1,7 @@
 # HeatShield — Pan-India Municipal Heatwave Response Network
 
+> **LIVE URL:** [https://heatshield.ap-south-1.awsapprunner.com](https://heatshield.ap-south-1.awsapprunner.com) *(AWS App Runner in `ap-south-1` &mdash; see [DEPLOY.md](DEPLOY.md) for deployment guide)*
+
 HeatShield is an open-source, multi-tenant heatwave response platform designed for municipal corporations, disaster management authorities, humanitarian field volunteers, and vulnerable residents across India. During extreme summer heatwaves, elderly individuals living alone, outdoor labourers (cycle-rickshaw pullers, construction workers, street vendors), and families in tin-roof or asbestos-roof housing face severe, life-threatening heat illness without anyone knowing their daily condition. 
 
 HeatShield determines daily heat danger using localized Apparent Temperature (Heat Index) calibrated across India's three major climate zones (Plains, Coastal, Hill), calculates an explainable, rule-based vulnerability triage score (0–100) for every household, runs automated volunteer visit auto-assignment, and coordinates emergency hydration and cooling shelter response in real time.
@@ -174,27 +176,16 @@ Follow these exact 5 steps during a presentation to demonstrate the complete eme
 
 | AWS Service | Status | Implementation Details |
 |---|---|---|
-| **Amazon SNS (Simple Notification Service)** | **Used for real now** | Implemented in `aws_services.py`. Dispatches SMS heat advisories and SOS notifications when AWS credentials are provided in `.env`. Gracefully falls back to simulated database logging if credentials are unset. |
-| **AWS Elastic Beanstalk / App Runner** | **Used for real now** | Configured via `Procfile` (`web: gunicorn app:app`). Ready for deployment with zero container configuration. |
-| **AWS Lambda** | **Included in code, optional to deploy** | Implemented in `lambda/heat_check_lambda.py`. Written with Python standard library (`urllib` only) to securely invoke the `/api/daily-heat-check` endpoint via `X-Heat-Token`. |
-| **Amazon EventBridge** | **Included in code, optional to deploy** | Daily morning cron schedule (`cron(0 0 * * ? *)` = 05:30 AM IST) to trigger the Lambda function before peak daylight hours. |
-| **Amazon Cognito** | *Future scope* | Production citizen identity verification and SMS OTP login. |
+| **AWS App Runner** | **Used for real now** | Production hosting in `ap-south-1` (Mumbai). Configured via `apprunner.yaml` and `Procfile` (`gunicorn -w 1 -b 0.0.0.0:8080 app:app`), health-checked via `/health`, with automatic deployment on GitHub push. |
+| **Amazon SNS (Simple Notification Service)** | **Used for real now** | Real-time broadcast advisories and emergency SOS notifications via topic `heatshield-alerts` with email & SMS endpoints. Safe fallback to local logs when credentials/topic are unconfigured. |
+| **AWS Lambda** | **Included in code, optional to deploy** | Daily morning automated heat-check handler in `lambda/heat_check_lambda.py` using Python standard library `urllib` to trigger `/api/daily-heat-check` via `X-Heat-Token`. |
+| **Amazon EventBridge** | **Included in code, optional to deploy** | Daily morning cron schedule (`cron(0 0 * * ? *)` = 05:30 AM IST) to trigger the heat-check Lambda before peak daylight hours. |
+| **Amazon Cognito** | *Future scope* | Citizen identity verification and SMS OTP login. |
 | **Amazon DynamoDB** | *Future scope* | Serverless multi-region NoSQL persistence for multi-city scaling. |
 | **Amazon Location Service** | *Future scope* | Geofencing and real-time turn-by-turn routing for volunteers on foot. |
 
-### AWS Elastic Beanstalk Deployment Steps
-1. Initialize an Elastic Beanstalk environment:
-   ```bash
-   eb init -p python-3.11 heatshield --region ap-south-1
-   ```
-2. Set production environment variables:
-   ```bash
-   eb setenv SECRET_KEY=your-secret-key HEAT_CHECK_TOKEN=your-token AWS_ACCESS_KEY_ID=your-key AWS_SECRET_ACCESS_KEY=your-secret AWS_REGION=ap-south-1
-   ```
-3. Deploy the application:
-   ```bash
-   eb create heatshield-prod
-   ```
+### AWS App Runner Deployment
+Complete step-by-step console instructions, IAM instance role definitions, and cost-control commands are detailed in [DEPLOY.md](DEPLOY.md).
 
 ---
 

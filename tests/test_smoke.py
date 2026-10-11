@@ -45,6 +45,11 @@ class TestSmokeAndFlow(unittest.TestCase):
         resp_about = self.client.get("/about")
         self.assertEqual(resp_about.status_code, 200)
 
+        # GET /health for AWS App Runner health check
+        resp_health = self.client.get("/health")
+        self.assertEqual(resp_health.status_code, 200)
+        self.assertIn(b"ok", resp_health.data)
+
         resp_register = self.client.get("/register")
         self.assertEqual(resp_register.status_code, 200)
 

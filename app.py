@@ -1,5 +1,6 @@
 import os
 from flask import Flask, render_template, session, request
+from werkzeug.middleware.proxy_fix import ProxyFix
 from config import Config
 from database import init_db, seed_db
 from translations import get_text
@@ -14,9 +15,23 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
+    # Enable ProxyFix to correctly handle HTTPS behind AWS App Runner load balancer
+    app.wsgi_app = ProxyFix(
+        app.wsgi_app,
+        x_for=1,
+        x_proto=1,
+        x_host=1,
+        x_prefix=1
+    )
+
     # Initialize SQLite database and seed demo data on first run
     init_db()
     seed_db(pass_level=2)
+
+    # Health check endpoint for AWS App Runner
+    @app.route("/health")
+    def health_check():
+        return {"status": "ok", "service": "heatshield"}, 200
 
     # Register blueprints
     app.register_blueprint(auth_bp)
@@ -66,6 +81,8 @@ if __name__ == "__main__":
     print("   • Volunteer (Jaipur):      username 'vol_vikram'    / password 'vol123'")
     print("   • Resident (Ram Prasad):   username 'res_ram'       / password 'res123' (Unchecked High-Risk)")
     print("   • Resident (Shanti Devi):  username 'res_shanti'    / password 'res123' (Ready to check in)")
-    print(" Server starting on http://127.0.0.1:5000 ...")
+    port = int(os.environ.get("PORT", 5000))
+    debug = os.environ.get("FLASK_DEBUG", "0") == "1"
+    print(f" Server starting on http://0.0.0.0:{port} (debug={debug}) ...")
     print("==================================================================")
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=port, debug=debug)
