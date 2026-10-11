@@ -19,6 +19,9 @@ class Config:
     # Secure session cookies behind HTTPS (enabled in production or when HTTPS proxy is present)
     SESSION_COOKIE_SECURE = os.environ.get("SESSION_COOKIE_SECURE", "false").lower() in ("true", "1") or os.environ.get("ENV") == "production"
     
+    # Auto-reload templates when modified on disk
+    TEMPLATES_AUTO_RELOAD = True
+    
     # Weather caching & network constraints
     WEATHER_CACHE_MINUTES = int(os.environ.get("WEATHER_CACHE_MINUTES", 30))
     WEATHER_TIMEOUT_SECONDS = float(os.environ.get("WEATHER_TIMEOUT_SECONDS", 5.0))
